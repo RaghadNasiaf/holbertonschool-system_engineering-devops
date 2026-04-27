@@ -1,0 +1,90 @@
+Scale up web infrastructure
+
+A user wants to access the website www.foobar.com from their browser.
+
+The user sends an HTTPS request to www.foobar.com. DNS resolves the domain name to the load balancer cluster IP. The request reaches one of the HAProxy load balancers. The load balancer forwards the request to the web server. The web server forwards dynamic requests to the application server. The application server runs the application code and communicates with the database server.
+
+Infrastructure:
+
+User
+ |
+ | HTTPS request
+ v
+DNS: www.foobar.com -> Load Balancer Cluster IP
+ |
+ v
+Load Balancer Cluster
+HAProxy 1 <---- cluster ----> HAProxy 2
+ |
+ v
+Web Server
+Nginx
+ |
+ v
+Application Server
+Application code base
+ |
+ v
+Database Server
+MySQL Primary
+
+Explanation of additional elements:
+
+1. Additional server
+
+An additional server is added to split the infrastructure into separate layers.
+
+Instead of having the web server, application server, and database on the same machine, each component now has its own server. This makes the infrastructure easier to scale, maintain, and secure.
+
+2. Second load balancer
+
+A second HAProxy load balancer is added and configured as a cluster with the first load balancer.
+
+This removes the load balancer as a single point of failure. If one load balancer fails, the other load balancer can continue receiving traffic.
+
+The load balancers can use a virtual IP address so that users access one IP address, while the active load balancer handles the traffic.
+
+3. Web server on its own server
+
+The web server, Nginx, is moved to its own server.
+
+The web server handles HTTP or HTTPS requests and serves static files such as HTML, CSS, JavaScript, and images. It forwards dynamic requests to the application server.
+
+Having a dedicated web server allows it to be scaled independently if the website receives more traffic.
+
+4. Application server on its own server
+
+The application server is moved to its own server.
+
+The application server runs the backend logic of the website. It executes the application code, processes user requests, and communicates with the database.
+
+Separating the application server from the web server makes it easier to scale the application layer independently.
+
+5. Database server on its own server
+
+The database, MySQL, is moved to its own server.
+
+The database stores and manages the website data.
+
+Having a dedicated database server improves security and performance because the database can be optimized separately from the web and application layers.
+
+Why splitting components is useful:
+
+Splitting the web server, application server, and database server makes the infrastructure more scalable.
+
+Each component can be monitored, secured, maintained, and scaled independently.
+
+For example, if the application logic becomes slow, we can add more application servers without changing the database server.
+
+If the database needs more memory or disk, we can upgrade only the database server.
+
+Remaining issues:
+
+This infrastructure is better than the previous designs, but it can still be improved.
+
+There is only one web server, one application server, and one database server, so each of these components can still become a single point of failure.
+
+To improve it further, we could add multiple web servers, multiple application servers, database replication, firewalls, monitoring, and HTTPS everywhere.
+
+Diagram:
+https://imgur.com/a/2ugqVQO
