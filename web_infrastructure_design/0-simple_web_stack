@@ -1,0 +1,58 @@
+Simple web stack
+
+A user wants to access the website www.foobar.com from their computer.
+
+First, the user types www.foobar.com in the browser. The browser asks DNS to translate the domain name into an IP address. The domain foobar.com has a DNS www record that points to the server IP address 8.8.8.8.
+
+The user browser then sends an HTTP or HTTPS request over the Internet to the server at 8.8.8.8.
+
+Infrastructure:
+
+User's computer
+        |
+        | HTTP / HTTPS request
+        |
+DNS: www.foobar.com -> 8.8.8.8
+        |
+        v
+Server: 8.8.8.8
+        |
+        |-- Web server: Nginx
+        |
+        |-- Application server
+        |
+        |-- Application files: code base
+        |
+        |-- Database: MySQL
+
+Explanation of each component:
+
+A server is a physical or virtual computer that provides services or resources to other computers called clients.
+
+The domain name foobar.com gives a human-readable name to the website. Instead of remembering the IP address 8.8.8.8, users can type www.foobar.com.
+
+The www in www.foobar.com is a DNS record. In this infrastructure, www is an A record because it points directly to the server IP address 8.8.8.8.
+
+The web server, Nginx, receives HTTP or HTTPS requests from the user's browser. It can serve static files directly, such as HTML, CSS, images, and JavaScript. For dynamic pages, it forwards the request to the application server.
+
+The application server runs the application logic. It executes the backend code from the code base, processes the user request, communicates with the database if needed, and generates a dynamic response.
+
+The application files, also called the code base, contain the source code of the website or web application.
+
+The database, MySQL, stores and organizes the website data so it can be accessed, updated, and managed. For example, it can store users, posts, products, comments, or any other application data.
+
+The server communicates with the user's computer using the HTTP or HTTPS protocol over TCP/IP.
+
+Issues with this infrastructure:
+
+1. Single Point of Failure, SPOF
+
+Everything is hosted on one server. If this server goes down, the whole website becomes unavailable. The web server, application server, application files, and database are all on the same machine.
+
+2. Downtime during maintenance
+
+If we need to deploy new code, restart Nginx, restart the application server, update MySQL, or reboot the server, the website may be unavailable during that time.
+
+3. Cannot scale easily
+
+This infrastructure cannot handle too much incoming traffic because there is only one server. If many users access the website at the same time, the server can become overloaded in CPU, memory, disk, or network usage.
