@@ -1,0 +1,127 @@
+Secured and monitored web infrastructure
+
+A user wants to access the website www.foobar.com from their browser.
+
+The user types https://www.foobar.com. DNS resolves www.foobar.com to the load balancer IP address. The user sends an HTTPS request to the load balancer. The request passes through a firewall before reaching the load balancer. The load balancer distributes the traffic between two backend servers. Each server has a firewall, a web server, an application server, application files, a database, and a monitoring client.
+
+Infrastructure:
+
+User
+ |
+ | HTTPS request
+ v
+DNS: www.foobar.com -> Load Balancer IP
+ |
+ v
+Firewall 1
+ |
+ v
+Load Balancer: HAProxy
+SSL certificate for www.foobar.com
+Round Robin algorithm
+ |
+ +------------------------+
+ |                        |
+ v                        v
+Firewall 2                Firewall 3
+ |                        |
+ v                        v
+Server 1                  Server 2
+Nginx                     Nginx
+Application Server        Application Server
+Code Base                 Code Base
+MySQL Primary             MySQL Replica
+Monitoring Client         Monitoring Client
+
+Monitoring Service:
+Sumologic or another monitoring service receives metrics and logs from the monitoring clients.
+
+Explanation of additional elements:
+
+1. Firewalls
+
+Three firewalls are added to protect the infrastructure.
+
+Firewall 1 is placed before the load balancer to control incoming traffic from the Internet.
+
+Firewall 2 protects Server 1.
+
+Firewall 3 protects Server 2.
+
+Firewalls are used to filter network traffic. They allow trusted traffic and block unwanted or dangerous traffic. For example, a firewall can allow only HTTP, HTTPS, and SSH from trusted IP addresses.
+
+2. SSL certificate
+
+An SSL certificate is added to serve www.foobar.com over HTTPS.
+
+HTTPS encrypts the traffic between the user's browser and the website. This protects sensitive data such as passwords, cookies, personal information, and session tokens.
+
+HTTPS also helps users verify that they are communicating with the real website and not an attacker.
+
+3. Monitoring clients
+
+Monitoring clients are installed on the servers to collect metrics and logs.
+
+Monitoring is used to know if the infrastructure is healthy. It helps detect problems such as high CPU usage, high memory usage, disk issues, network issues, application errors, database problems, and downtime.
+
+A monitoring service like Sumologic can receive data from the monitoring clients, store it, analyze it, create dashboards, and trigger alerts when something is wrong.
+
+How the monitoring tool collects data:
+
+The monitoring client runs on each server.
+
+It collects system metrics such as CPU, memory, disk, and network usage.
+
+It can also collect logs from services like Nginx, the application server, and MySQL.
+
+The monitoring client sends this data to the monitoring service.
+
+Monitoring web server QPS:
+
+QPS means Queries Per Second.
+
+To monitor the web server QPS, we need to collect request metrics from Nginx.
+
+This can be done by enabling Nginx access logs or the Nginx status module, then configuring the monitoring client to collect and send request count metrics to the monitoring service.
+
+The monitoring service can then calculate how many requests per second the web server is handling.
+
+Load balancer algorithm:
+
+The load balancer uses the Round Robin algorithm.
+
+Round Robin sends requests to each backend server one after another. For example, request 1 goes to Server 1, request 2 goes to Server 2, request 3 goes back to Server 1, and so on.
+
+Issues with this infrastructure:
+
+1. SSL termination at the load balancer level
+
+Terminating SSL at the load balancer means HTTPS is decrypted at the load balancer.
+
+This can be an issue because traffic between the load balancer and the backend servers may become unencrypted HTTP traffic.
+
+If an attacker gets access to the internal network, they may be able to read or modify the traffic between the load balancer and the servers.
+
+A more secure design would also encrypt traffic between the load balancer and the backend servers.
+
+2. Only one MySQL server can accept writes
+
+Having only one MySQL Primary server that accepts writes is an issue because it is a single point of failure for write operations.
+
+If the Primary database goes down, the application cannot create, update, or delete data unless failover is configured and the Replica is promoted to Primary.
+
+It can also become a bottleneck if there are too many write operations.
+
+3. Servers with all the same components
+
+Having every server contain the web server, application server, and database can be a problem.
+
+It makes scaling harder because each component may need different resources.
+
+For example, the database may need more disk and memory, while the web server may need more network capacity.
+
+It also increases security risk because if one server is compromised, the attacker may get access to the application and database on the same machine.
+
+A better design would separate components into different layers, such as web servers, application servers, and database servers.
+Diagram:
+https://imgur.com/a/CnSIKr8
