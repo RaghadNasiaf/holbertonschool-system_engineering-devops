@@ -1,0 +1,92 @@
+Distributed web infrastructure
+
+A user wants to access the website www.foobar.com from their browser.
+
+The user types www.foobar.com. DNS resolves the domain name to the IP address of the load balancer. The user's browser sends an HTTP request to the load balancer. The load balancer distributes the request between two backend servers.
+
+Infrastructure:
+
+User
+ |
+ | HTTP request
+ v
+DNS: www.foobar.com
+ |
+ v
+Load Balancer: HAProxy
+ |
+ | Round Robin distribution
+ |
+ +------------------------+
+ |                        |
+ v                        v
+Server 1                  Server 2
+Nginx                     Nginx
+Application Server        Application Server
+Code Base                 Code Base
+MySQL Primary             MySQL Replica
+
+Explanation of additional elements:
+
+A load balancer is added to distribute incoming traffic between multiple servers. This helps the infrastructure handle more requests and improves availability.
+
+A second server is added to reduce the load on a single server and provide redundancy. If one backend server fails, the other server can still serve traffic.
+
+Each server has Nginx as the web server. Nginx receives HTTP requests and forwards dynamic requests to the application server.
+
+Each server has an application server. The application server runs the backend logic of the website.
+
+Each server has a copy of the application files, also called the code base. This allows both servers to serve the same website.
+
+Each server has a MySQL database. The databases are configured as a Primary-Replica cluster.
+
+Load balancer distribution algorithm:
+
+The load balancer is configured with the Round Robin algorithm.
+
+Round Robin sends requests to each backend server one after another in order. For example, the first request goes to Server 1, the second request goes to Server 2, the third request goes back to Server 1, and so on.
+
+Active-Active or Active-Passive:
+
+This infrastructure is Active-Active because both backend servers are receiving traffic at the same time.
+
+In an Active-Active setup, all servers are working and serving requests at the same time.
+
+In an Active-Passive setup, one server is active and serves traffic, while the other server waits as a backup. The passive server only starts serving traffic if the active server fails.
+
+Database Primary-Replica cluster:
+
+In a Primary-Replica database cluster, the Primary database handles write operations such as INSERT, UPDATE, and DELETE.
+
+The Replica database copies data from the Primary database through replication. The Replica is mainly used for read operations such as SELECT queries.
+
+Difference between Primary and Replica for the application:
+
+The application must send write queries to the Primary database.
+
+The application can send read queries to the Replica database to reduce the load on the Primary database.
+
+If the Primary database fails, write operations may stop unless a Replica is promoted to become the new Primary.
+
+Issues with this infrastructure:
+
+1. Single Points of Failure, SPOF
+
+The load balancer is a SPOF. If the load balancer fails, users cannot reach the website even if the backend servers are still running.
+
+The Primary database is also a SPOF for write operations. If the Primary database fails, the application cannot write new data unless failover is configured.
+
+2. Security issues
+
+There is no firewall. This means there is no network filtering to control which traffic can reach the servers.
+
+There is no HTTPS. Traffic between the user and the website is not encrypted, so sensitive information can be exposed.
+
+3. No monitoring
+
+There is no monitoring system to track server health, CPU, memory, disk usage, database status, application errors, or uptime.
+
+Without monitoring, failures may not be detected quickly.
+
+Diagram:
+https://imgur.com/a/RrMqR5r
