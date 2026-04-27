@@ -56,3 +56,5 @@ If we need to deploy new code, restart Nginx, restart the application server, up
 3. Cannot scale easily
 
 This infrastructure cannot handle too much incoming traffic because there is only one server. If many users access the website at the same time, the server can become overloaded in CPU, memory, disk, or network usage.
+Diagram:
+https://imgur.com/a/Y9Q60YE
